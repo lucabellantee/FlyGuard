@@ -33,7 +33,7 @@
 
 ### 7. `np` (Power Turbine Speed)
 - **Descrizione**: Velocità della turbina di potenza, misurata in giri al minuto (RPM).
-- **Unità di misura internazionale**: Revolutions per minute(RPM)
+- **Unità di misura internazionale**: Revolutions per minute(RPM)  ---> Dai dati, si osserva che non può essere questa l'unità di misura corretta. Probabilmente, sarà un suo multiplo.
 - **Uso**: Indica la velocità con cui la turbina di potenza ruota. Fluttuazioni possono suggerire problemi meccanici o instabilità.
 
 ### 8. `ng` (Gas Generator Speed)
