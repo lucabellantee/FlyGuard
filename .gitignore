@@ -1,0 +1,6 @@
+# Ignore the Dataset folder
+Dataset/
+
+# Ignore hidden system files (optional)
+.DS_Store
+Thumbs.db
