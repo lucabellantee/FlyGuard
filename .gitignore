@@ -1,5 +1,6 @@
 # Ignore the Dataset folder
 Dataset/
+Model/
 
 # Ignore hidden system files (optional)
 .DS_Store
