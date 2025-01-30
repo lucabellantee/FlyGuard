@@ -69,3 +69,6 @@ if __name__ == "__main__":
     
     # Salva il dataset con le previsioni
     inference_model.save_results(X_cl, 'Dataset/Results/X_cl_results.csv')
+
+    # Crea il file json di risposta
+    inference_model.build_json(X_cl)

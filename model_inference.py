@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 import joblib
@@ -125,3 +126,30 @@ class ModelInference:
             "loc": mu,
             "scale": s,
         }
+    
+    def build_json(self, data):
+        json_data = {}
+        
+        for i, row in data.iterrows():
+            # Estrae i valori delle colonne rilevanti
+            class_value = row['faulty']
+            class_conf = 2
+            pdf_type = row['best_pdf']
+            loc = row['loc']
+            scale = row['scale']
+            
+            # Crea la struttura del JSON per questa riga
+            json_data[str(i)] = {
+                "class": int(class_value),
+                "class_conf": float(class_conf),
+                "pdf_type": pdf_type,
+                "pdf_args": {
+                    "loc": float(loc),
+                    "scale": float(scale)
+                }
+            }
+        
+        # Salva tutto in un unico file JSON
+        with open('output.json', 'w') as outfile:
+            json.dump(json_data, outfile, indent=4)
+
