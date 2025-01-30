@@ -30,8 +30,9 @@ if __name__ == "__main__":
     # Effettua previsioni
     y_pred_regression = inference_model.predict_regression(X_rg)
     X_cl['trq_target'] = y_pred_regression
-    y_pred_classification = inference_model.predict_classification(X_cl)
+    y_pred_classification, y_pred_confidence = inference_model.predict_classification(X_cl)
     X_cl['faulty'] = y_pred_classification
+    X_cl['confidence'] = y_pred_confidence
 
     # Stampa metriche
     inference_model.evaluate_regression(y_true_regression, y_pred_regression)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     print(f"p-value: {best_distribution_result['ks_pvalue']:.4f}") """
     
     # Salva il dataset con le previsioni
-    inference_model.save_results(X_cl, 'Dataset/Results/X_cl_results.csv')
+    inference_model.save_results(X_cl, 'Results\X_cl_results.csv')
 
     # Crea il file json di risposta
     inference_model.build_json(X_cl)

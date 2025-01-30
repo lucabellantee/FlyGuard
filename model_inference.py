@@ -2,7 +2,7 @@ import json
 import numpy as np
 import pandas as pd
 import joblib
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import classification_report, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from scipy.stats import (norm, expon, uniform, gamma, beta, lognorm, chi2, weibull_min,
                          t, f, cauchy, laplace, rayleigh, pareto, gumbel_r, logistic,
@@ -26,7 +26,22 @@ class ModelInference:
         """
         Effettua una previsione con il modello di classificazione.
         """
-        return self.rf_classifier.predict(X)
+        prediction = self.rf_classifier.predict(X)
+        confidence_score = self.rf_classifier.predict_proba(X)
+
+        # Creiamo una lista per i punteggi di confidenza corrispondenti
+        confidence_scores = []
+
+        # Iteriamo su ciascuna previsione
+        for i, pred in enumerate(prediction):
+            if pred == 0:
+                # Se la previsione è 0, prendiamo la probabilità associata alla classe 0
+                confidence_scores.append(confidence_score[i, 0])
+            else:
+                # Se la previsione è 1, prendiamo la probabilità associata alla classe 1
+                confidence_scores.append(confidence_score[i, 1])
+        
+        return prediction, confidence_scores
 
     def evaluate_regression(self, y_true, y_pred):
         """
@@ -133,7 +148,7 @@ class ModelInference:
         for i, row in data.iterrows():
             # Estrae i valori delle colonne rilevanti
             class_value = row['faulty']
-            class_conf = 2
+            class_conf = row['confidence']
             pdf_type = row['best_pdf']
             loc = row['loc']
             scale = row['scale']
@@ -150,6 +165,5 @@ class ModelInference:
             }
         
         # Salva tutto in un unico file JSON
-        with open('output.json', 'w') as outfile:
+        with open('Results\output.json', 'w') as outfile:
             json.dump(json_data, outfile, indent=4)
-
