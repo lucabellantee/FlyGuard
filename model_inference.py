@@ -167,3 +167,5 @@ class ModelInference:
         # Salva tutto in un unico file JSON
         with open('Results\output.json', 'w') as outfile:
             json.dump(json_data, outfile, indent=4)
+        
+        print("JSON salvato correttamente")

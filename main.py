@@ -30,6 +30,7 @@ if __name__ == "__main__":
     # Effettua previsioni
     y_pred_regression = inference_model.predict_regression(X_rg)
     X_cl['trq_target'] = y_pred_regression
+    X_cl['trq_margin'] = ((X_cl['trq_measured'] - X_cl['trq_target']) / X_cl['trq_target'])*100
     y_pred_classification, y_pred_confidence = inference_model.predict_classification(X_cl)
     X_cl['faulty'] = y_pred_classification
     X_cl['confidence'] = y_pred_confidence
