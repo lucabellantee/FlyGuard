@@ -39,3 +39,13 @@ if __name__ == "__main__":
     # Stampa metriche
     inference_model.evaluate_regression(y_true_regression, y_pred_regression)
     inference_model.evaluate_classification(y_true_classification, y_pred_classification)
+
+    # Calcola la distribuzione logistica
+    logistic_results = inference_model.fit_logistic_distribution(X_test['trq_target'])
+    
+    if logistic_results:
+        print("\n📊 **Distribuzione Logistica**")
+        print(f"Nome Distribuzione: {logistic_results['dist_name']}")
+        print(f"Parametri stimati: {logistic_results['params']}")
+        print(f"KS Statistica: {logistic_results['ks_stat']:.4f}")
+        print(f"p-value: {logistic_results['ks_pvalue']:.4f}")

@@ -2,6 +2,7 @@ import pandas as pd
 import joblib
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from scipy.stats import logistic, kstest
 
 class ModelInference:
     def __init__(self, regressor_path: str, classifier_path: str):
@@ -62,3 +63,25 @@ class ModelInference:
         """
         X_cl.to_csv(filename, index=False)
         print(f"\n✅ Dataset salvato in: {filename}")
+
+    def fit_logistic_distribution(self, data):
+        """
+        Calcola la distribuzione logistica e ritorna i parametri stimati
+        e il test KS.
+        """
+        try:
+            # Stima i parametri della distribuzione logistica
+            params = logistic.fit(data)
+            
+            # Calcola il test KS per verificare l'adattamento
+            ks_stat, ks_pvalue = kstest(data, logistic.cdf, args=params)
+            
+            return {
+                "dist_name": "Logistic (logistic)",
+                "params": params,
+                "ks_stat": ks_stat,
+                "ks_pvalue": ks_pvalue
+            }
+        except Exception as e:
+            print(f"Errore durante l'adattamento della distribuzione logistica: {e}")
+            return None
