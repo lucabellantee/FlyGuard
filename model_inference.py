@@ -72,13 +72,18 @@ class ModelInference:
         try:
             # Stima i parametri della distribuzione logistica
             params = logistic.fit(data)
+
+            # Estraggo i singoli parametri
+            mu = params[0]  # Media (location)
+            s = params[1]   # Scala (scale)
             
             # Calcola il test KS per verificare l'adattamento
             ks_stat, ks_pvalue = kstest(data, logistic.cdf, args=params)
             
             return {
                 "dist_name": "Logistic (logistic)",
-                "params": params,
+                "loc": mu,
+                "scale": s,
                 "ks_stat": ks_stat,
                 "ks_pvalue": ks_pvalue
             }
