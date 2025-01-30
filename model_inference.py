@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import joblib
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -105,13 +106,13 @@ class ModelInference:
                 ks_stat, ks_pvalue = kstest(data, dist.cdf, args=params)
                 results.append((dist_name, ks_stat, ks_pvalue, params))
             except Exception:
-                results.append((dist_name, np.inf, 0, None))  # Errore nella stima
+                results.append((dist_name, np.inf, 0, None))
 
         # Ordina i risultati per KS statistic (più basso è migliore)
         results = sorted(results, key=lambda x: x[1])
 
-        # Restituisce la miglior distribuzione
-        best_fit = results[0]  # La distribuzione con la migliore KS-statistica
+        # Restituisce la miglior distribuzione con la migliore KS-statistica
+        best_fit = results[0]
 
         # Estraggo i singoli parametri
         mu = best_fit[3][0]  # Media (location)
