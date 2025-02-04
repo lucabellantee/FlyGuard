@@ -3,6 +3,7 @@ import numpy as np
 import scipy.stats as stats
 import pandas as pd
 import joblib
+from tqdm import tqdm
 from sklearn.metrics import classification_report, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from scipy.stats import (norm, expon, uniform, gamma, beta, lognorm, chi2, weibull_min,
@@ -147,8 +148,8 @@ class ModelInference:
         """
         Per ogni valore previsto di trq_target, trova la miglior distribuzione tra quelle candidate.
         """
-        results = {}
-        """ distributions = {
+        results = []
+        distributions = {
             "norm": stats.norm,
             "expon": stats.expon,
             "uniform": stats.uniform,
@@ -157,15 +158,10 @@ class ModelInference:
             "cauchy": stats.cauchy,
             "laplace": stats.laplace,
             "logistic": stats.logistic
-        } """
-        distributions = {
-            "cauchy": stats.cauchy,
-            "expon": stats.expon,
-            "lognorm": stats.lognorm
         }
 
-        for i in range(len(y_pred_regression)):
-            single_pred_samples = y_pred_regression[i]  # Prendi il valore della previsione
+        for i in tqdm(range(len(y_pred_regression)), desc="Calcolo miglior distribuzione per ogni campione"):
+            single_pred_samples = y_pred_regression[i]
             best_fit = None
             best_ll = -np.inf
             best_params = None
@@ -173,7 +169,7 @@ class ModelInference:
 
             for dist_name, dist in distributions.items():
                 try:
-                    params = dist.fit([single_pred_samples])  # Adatta la distribuzione
+                    params = dist.fit([single_pred_samples])
                     ll = np.sum(dist.logpdf([single_pred_samples], *params))
                     if ll > best_ll:
                         best_ll = ll
@@ -184,24 +180,21 @@ class ModelInference:
                     continue
 
             if best_params:
-                pdf_args = {
+                results.append({
+                    "trq_target_pred": single_pred_samples,
+                    "pdf_type": best_pdf_type,
                     "loc": best_params[1] if len(best_params) > 1 else 0,
                     "scale": best_params[2] if len(best_params) > 2 else 1
-                }
-                if len(best_params) > 3:
-                    pdf_args["shape"] = best_params[0]
-
+                })
             else:
-                pdf_args = {}
-
-            results[i] = {
-                "trq_target_pred": single_pred_samples,
-                "pdf_type": best_pdf_type,
-                "pdf_args": pdf_args
-            }
+                results.append({
+                    "trq_target_pred": single_pred_samples,
+                    "pdf_type": best_pdf_type,
+                    "loc": 0,
+                    "scale": 0
+                })
 
         return results
-    
     
     
     def build_json(self, data):

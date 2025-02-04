@@ -42,30 +42,20 @@ if __name__ == "__main__":
     # Calcola la miglior distribuzione per l'intera colonna 'trq_target'
     best_distribution_results = inference_model.fit_best_distribution_per_sample(y_pred_regression)
 
-    # Aggiungo le informazioni sulla miglior distribuzione per ogni riga
-    X_cl['best_pdf'] = [res["pdf_type"] for res in best_distribution_results]
-    X_cl['loc'] = [res["loc"] for res in best_distribution_results]
-    X_cl['scale'] = [res["scale"] for res in best_distribution_results]
+    if 'best_pdf' not in X_cl.columns:
+        X_cl['best_pdf'] = None
+    if 'loc' not in X_cl.columns:
+        X_cl['loc'] = None
+    if 'scale' not in X_cl.columns:
+        X_cl['scale'] = None
 
-    """ # Calcola la miglior distribuzione
-    for i, row in X_cl.iterrows():
-        trq_value = row['trq_target']
+    # Verifica che la lunghezza di best_distribution_results non sia inferiore a 100
+    n_rows = min(len(X_cl), len(best_distribution_results))
 
-        # Calcola la miglior distribuzione per il singolo valore trq_target
-        best_distribution_result = inference_model.fit_best_distribution(pd.Series([trq_value]))
-
-        X_cl.at[i, 'dist_name'] = best_distribution_result['dist_name']
-        X_cl.at[i, 'loc'] = best_distribution_result['loc']
-        X_cl.at[i, 'scale'] = best_distribution_result['scale']
-        X_cl.at[i, 'KS_stat'] = best_distribution_result['ks_stat']
-        X_cl.at[i, 'p_value'] = best_distribution_result['ks_pvalue'] """
-        
-    """ print("\n📊 **Distribuzione Logistica**")
-    print(f"Nome Distribuzione: {best_distribution_result['dist_name']}")
-    print(f"Media (mu - loc): {best_distribution_result['loc']:.4f}")
-    print(f"Scala (scale): {best_distribution_result['scale']:.4f}")
-    print(f"KS Statistica: {best_distribution_result['ks_stat']:.4f}")
-    print(f"p-value: {best_distribution_result['ks_pvalue']:.4f}") """
+    # Aggiorna solo i primi n_rows di X_cl
+    X_cl.iloc[:n_rows, X_cl.columns.get_loc('best_pdf')] = [res["pdf_type"] if res["pdf_type"] else "None" for res in best_distribution_results[:n_rows]]
+    X_cl.iloc[:n_rows, X_cl.columns.get_loc('loc')] = [res["loc"] if res["pdf_type"] else None for res in best_distribution_results[:n_rows]]
+    X_cl.iloc[:n_rows, X_cl.columns.get_loc('scale')] = [res["scale"] if res["pdf_type"] else None for res in best_distribution_results[:n_rows]]
     
     # Salva il dataset con le previsioni
     inference_model.save_results(X_cl, 'Results/X_cl_results.csv')
