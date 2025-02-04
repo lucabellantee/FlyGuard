@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import scipy.stats as stats
 import pandas as pd
 import joblib
 from sklearn.metrics import classification_report, mean_absolute_error, mean_squared_error, r2_score
@@ -47,16 +48,16 @@ class ModelInference:
         """
         Calcola e stampa le metriche della regressione.
         """
-        mae = mean_absolute_error(y_true, y_pred)
-        mse = mean_squared_error(y_true, y_pred)
-        rmse = mean_squared_error(y_true, y_pred, squared=False)
-        r2 = r2_score(y_true, y_pred)
+        #mae = mean_absolute_error(y_true, y_pred)
+        #mse = mean_squared_error(y_true, y_pred)
+        #rmse = mean_squared_error(y_true, y_pred, squared=False)
+        #r2 = r2_score(y_true, y_pred)
 
-        print("\n📊 **Metriche Regressione**")
-        print(f"MAE: {mae:.4f}")
-        print(f"MSE: {mse:.4f}")
-        print(f"RMSE: {rmse:.4f}")
-        print(f"R² Score: {r2:.4f}")
+        #print("\n📊 **Metriche Regressione**")
+        #print(f"MAE: {mae:.4f}")
+        #print(f"MSE: {mse:.4f}")
+        #print(f"RMSE: {rmse:.4f}")
+        #print(f"R² Score: {r2:.4f}")
 
     def evaluate_classification(self, y_true, y_pred):
         """
@@ -141,6 +142,67 @@ class ModelInference:
             "loc": mu,
             "scale": s,
         }
+        
+    def fit_best_distribution_per_sample(self, y_pred_regression):
+        """
+        Per ogni valore previsto di trq_target, trova la miglior distribuzione tra quelle candidate.
+        """
+        results = {}
+        """ distributions = {
+            "norm": stats.norm,
+            "expon": stats.expon,
+            "uniform": stats.uniform,
+            "lognorm": stats.lognorm,
+            "chi2": stats.chi2,
+            "cauchy": stats.cauchy,
+            "laplace": stats.laplace,
+            "logistic": stats.logistic
+        } """
+        distributions = {
+            "cauchy": stats.cauchy,
+            "expon": stats.expon,
+            "lognorm": stats.lognorm
+        }
+
+        for i in range(len(y_pred_regression)):
+            single_pred_samples = y_pred_regression[i]  # Prendi il valore della previsione
+            best_fit = None
+            best_ll = -np.inf
+            best_params = None
+            best_pdf_type = None
+
+            for dist_name, dist in distributions.items():
+                try:
+                    params = dist.fit([single_pred_samples])  # Adatta la distribuzione
+                    ll = np.sum(dist.logpdf([single_pred_samples], *params))
+                    if ll > best_ll:
+                        best_ll = ll
+                        best_fit = dist
+                        best_pdf_type = dist_name
+                        best_params = params
+                except Exception:
+                    continue
+
+            if best_params:
+                pdf_args = {
+                    "loc": best_params[1] if len(best_params) > 1 else 0,
+                    "scale": best_params[2] if len(best_params) > 2 else 1
+                }
+                if len(best_params) > 3:
+                    pdf_args["shape"] = best_params[0]
+
+            else:
+                pdf_args = {}
+
+            results[i] = {
+                "trq_target_pred": single_pred_samples,
+                "pdf_type": best_pdf_type,
+                "pdf_args": pdf_args
+            }
+
+        return results
+    
+    
     
     def build_json(self, data):
         json_data = {}
@@ -165,7 +227,7 @@ class ModelInference:
             }
         
         # Salva tutto in un unico file JSON
-        with open('Results\output.json', 'w') as outfile:
+        with open('Results/output.json', 'w') as outfile:
             json.dump(json_data, outfile, indent=4)
         
         print("JSON salvato correttamente")

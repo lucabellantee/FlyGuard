@@ -40,14 +40,12 @@ if __name__ == "__main__":
     inference_model.evaluate_classification(y_true_classification, y_pred_classification)
 
     # Calcola la miglior distribuzione per l'intera colonna 'trq_target'
-    best_distribution_result = inference_model.fit_best_distribution(X_cl['trq_target'])
+    best_distribution_results = inference_model.fit_best_distribution_per_sample(y_pred_regression)
 
     # Aggiungo le informazioni sulla miglior distribuzione per ogni riga
-    X_cl['best_pdf'] = best_distribution_result['dist_name']
-    X_cl['loc'] = best_distribution_result['loc']
-    X_cl['scale'] = best_distribution_result['scale']
-    X_cl['KS_stat'] = best_distribution_result['ks_stat']
-    X_cl['p_value'] = best_distribution_result['ks_pvalue']
+    X_cl['best_pdf'] = [res["pdf_type"] for res in best_distribution_results]
+    X_cl['loc'] = [res["loc"] for res in best_distribution_results]
+    X_cl['scale'] = [res["scale"] for res in best_distribution_results]
 
     """ # Calcola la miglior distribuzione
     for i, row in X_cl.iterrows():
@@ -70,7 +68,7 @@ if __name__ == "__main__":
     print(f"p-value: {best_distribution_result['ks_pvalue']:.4f}") """
     
     # Salva il dataset con le previsioni
-    inference_model.save_results(X_cl, 'Results\X_cl_results.csv')
+    inference_model.save_results(X_cl, 'Results/X_cl_results.csv')
 
     # Crea il file json di risposta
     inference_model.build_json(X_cl)
