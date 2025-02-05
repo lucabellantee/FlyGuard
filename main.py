@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
@@ -35,12 +36,14 @@ if __name__ == "__main__":
     X_cl['faulty'] = y_pred_classification
     X_cl['confidence'] = y_pred_confidence
 
+    trq_margin = np.array(X_cl['trq_margin'])
+
     # Stampa metriche
     inference_model.evaluate_regression(y_true_regression, y_pred_regression)
     inference_model.evaluate_classification(y_true_classification, y_pred_classification)
 
     # Calcola la miglior distribuzione per l'intera colonna 'trq_target'
-    best_distribution_results = inference_model.fit_best_distribution_per_sample(y_pred_regression)
+    best_distribution_results = inference_model.fit_best_distribution_per_sample(trq_margin)
 
     if 'best_pdf' not in X_cl.columns:
         X_cl['best_pdf'] = None
