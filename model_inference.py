@@ -88,7 +88,8 @@ class ModelInference:
     def fit_best_distribution(self, data):
         """
         Trova la distribuzione migliore per i dati in input basandosi sulla statistica KS.
-        Restituisce la distribuzione con i parametri stimati, la KS statistic e il p-value.
+        Restituisce la distribuzione con i parametri stimati, la KS statistic, il p-value ed i
+        parametri loc e scale.
         """
         distributions = {
             "Normal (norm)": norm,
